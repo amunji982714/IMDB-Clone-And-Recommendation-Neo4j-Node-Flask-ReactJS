@@ -3,13 +3,14 @@ import {Link} from 'react-router-dom';
 import {logout} from '../redux/actions/AuthActions';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/cllogo.jpeg';
 
 class Header extends React.Component {
   render() {
     var {props} = this;
     var profile = _.get(props, 'profile');
     var isLoggedIn = !!_.get(props, 'auth.token');
+    // const { results } = this.state;
 
     return (
       <nav className="nt-app-header">
@@ -18,17 +19,9 @@ class Header extends React.Component {
             <img src={logoImg} alt="" />
           </Link>
         </div>
-        <ul className="nt-app-header-links">
-          <li>
-            <a className="nt-app-header-link"
-               href="https://github.com/neo4j-examples/neo4j-movies-template"
-               target="_blank"
-               rel="noopener noreferrer">
-              GitHub Project
-            </a>
-          </li>
-        </ul>
-        <div className="nt-app-header-profile-links">
+
+        {/* <div className='nt-app-header-top-right' /> */}
+          <div className="nt-app-header-profile-links">
           <div className="right">
             {
               profile ?
@@ -44,7 +37,12 @@ class Header extends React.Component {
               {isLoggedIn ? null : <Link to="/signup">Sign up</Link>}
             </div>
           </div>
-        </div>
+          </div>
+
+          {/* <div className='breadcrumbs-search'>
+              <div className='breadcrumbs-search-bar' /><Searchbar setResults={this.setResults} />
+              <div className='breadcrumbs-search-results' /><SearchResults results={results} />
+          </div> */}
       </nav>
     );
   }

@@ -16,7 +16,7 @@ nconf.env(['PORT', 'NODE_ENV'])
       alias: 'PORT',
       describe: 'Port to run on.',
       demand: false,
-      default: 3000
+      default: 3001
     },
     'n': {
       alias: "neo4j",
@@ -30,7 +30,7 @@ nconf.env(['PORT', 'NODE_ENV'])
     'PASSWORD' : process.env.MOVIE_DATABASE_PASSWORD,
     'neo4j': 'local',
     'neo4j-local': process.env.MOVIE_DATABASE_URL || 'bolt://localhost:7687',
-    'base_url': 'http://localhost:3000',
+    'base_url': 'http://localhost:3001',
     'api_path': '/api/v0'
   });
 

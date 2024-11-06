@@ -6,7 +6,9 @@ import * as Types from '../actions/MovieActionTypes';
 export default function* movieFlow() {
   yield all([
     takeEvery(Types.MOVIE_GENRES_GET_REQUEST, getGenres),
+    takeEvery(Types.MOVIE_GET_REQUEST, getAllMovies),
     takeEvery(Types.MOVIES_BY_GENRES_GET_REQUEST, getMoviesByGenre),
+    takeEvery(Types.MOVIES_BY_NAMES_GET_REQUEST, getMovieByName),
     takeEvery(Types.MOVIES_FEATURED_GET_REQUEST, getFeaturedMovies),
     takeEvery(Types.MOVIE_DETAIL_GET_REQUEST, getMovie),
     takeEvery(Types.MOVIE_RATE, rateMovie),
@@ -21,6 +23,16 @@ function* getGenres() {
   }
   catch (error) {
     yield put(Actions.getGenresFailure(error));
+  }
+}
+
+function* getAllMovies() {
+  try {
+    const response = yield call(MoviesApi.getAllMovies);
+    yield put(Actions.getAllMoviesSuccess(response));
+  }
+  catch (error) {
+    yield put(Actions.getAllMoviesFailure(error));
   }
 }
 
@@ -53,6 +65,18 @@ function* getMovie(action) {
   }
   catch (error) {
     yield put(Actions.getMovieFailure(error));
+  }
+}
+
+function* getMovieByName(action) {
+  var {name} = action;
+  try {
+    const response = yield call(MoviesApi.getMovieByName, name);
+    // console.log(response);
+    yield put(Actions.getMovieByNameSuccess(response));
+  }
+  catch (error) {
+    yield put(Actions.getMovieByNameFailure(error));
   }
 }
 

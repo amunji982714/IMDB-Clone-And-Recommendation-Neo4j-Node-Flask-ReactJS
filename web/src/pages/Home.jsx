@@ -8,21 +8,38 @@ import * as MovieActions from '../redux/actions/MovieActions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-class Home extends React.Component {
-  constructor() {
-    super();
+import { Searchbar } from './Searchbar';
+import { SearchResults } from './SearchResults';
+// import genre from '../../../api/models/neo4j/genre.js';
 
+class Home extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    // Initialize the results state and bind the setResults method
+    this.state = {
+      results: []
+    };
+    
+    this.setResults = this.setResults.bind(this);
     this.renderFeatured = this.renderFeatured.bind(this);
     this.renderByGenre = this.renderByGenre.bind(this);
   }
 
   componentWillMount() {
     this.props.getFeaturedMovies();
-    this.props.getMoviesByGenres(['Adventure', 'Drama']);
+    // this.props.genreList = 
+    this.props.getMoviesByGenres(['Adventure', 'Drama', 'Action']);
+  }
+
+  setResults(newResults) {
+    this.setState({ results: newResults });
   }
 
   render() {
     var {movies} = this.props;
+    // const { results } = this.state;
+
     return (
       <div className="nt-home">
         <div className="row">
@@ -31,8 +48,12 @@ class Home extends React.Component {
             {this.renderFeatured()}
           </div>
           <div className="large-12 columns">
+            {console.log(this.props.genreList)}
+            {/* {this.props.genreList.map((genre) => this.renderByGenre(genre) )} */}
+            
             {this.renderByGenre('Adventure')}
             {this.renderByGenre('Drama')}
+            {this.renderByGenre('Action')}
           </div>
         </div>
       </div>
@@ -41,9 +62,15 @@ class Home extends React.Component {
 
   renderFeatured() {
     var {movies} = this.props;
+    const { results } = this.state;
 
     return (
+      
       <div className="nt-home-featured">
+        <div className='breadcrumbs-search'>
+              <Searchbar setResults={this.setResults} />
+              <SearchResults results={results} />
+          </div>
         <h3 className="nt-home-header">Featured Movies</h3>
         <ul>
           { _.compact(movies.featured).map(f => {

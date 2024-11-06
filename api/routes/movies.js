@@ -1,3 +1,5 @@
+const { response } = require('express');
+
 // movies.js
 const Movies = require('../models/movies')
   , _ = require('lodash')
@@ -89,6 +91,17 @@ exports.findById = function (req, res, next) {
     .then(response => writeResponse(res, response))
     .catch(next);
 };
+
+// exports.findByName = function (req, res, next) {
+//   Movies.getByName(dbUtils.getSession(req), req.params.title)
+//     .then(response => {
+//       if (!_.isEmpty(result.records)) {
+//         writeResponse(res, response)
+//         }
+//       }
+//     )
+//     .catch(next);
+// }
 
 /**
  * @swagger

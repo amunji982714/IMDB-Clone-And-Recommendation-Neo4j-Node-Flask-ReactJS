@@ -62,6 +62,25 @@ const getAll = function (session) {
     .then(r => manyMovies(r));
 };
 
+// search movie names
+// const getByName = function(session, substring) {
+//   const query = [
+//     'MATCH (movie:Movie)',
+//     'WHERE movie.title CONTAINS $substring',
+//     'RETURN movie.tmdbId AS movieId'
+//   ].join('\n');
+
+//   return session.readTransaction(txc =>
+//       txc.run(query, {
+//         substring: substring
+//       })
+//     )
+//     .then(result => result.records.map(record => record.get('movieId')))
+//     .then(r => manyMovies(r))
+// };
+
+
+
 // get a single movie by id
 const getById = function (session, movieId, userId) {
   const query = [
@@ -215,28 +234,72 @@ const getRatedByUser = function (session, userId) {
 };
 
 const getRecommended = function (session, userId) {
-  return session.readTransaction(txc =>
-    txc.run(
-      'MATCH (me:User {id: $userId})-[my:RATED]->(m:Movie) \
-      MATCH (other:User)-[their:RATED]->(m) \
-      WHERE me <> other \
-      AND abs(my.rating - their.rating) < 2 \
-      WITH other,m \
-      MATCH (other)-[otherRating:RATED]->(movie:Movie) \
-      WHERE movie <> m \
-      WITH avg(otherRating.rating) AS avgRating, movie \
-      RETURN movie \
-      ORDER BY avgRating desc \
-      LIMIT 25',
-      {userId: userId}
+  // return session.readTransaction(txc =>
+  //   txc.run(
+  //     'MATCH (me:User {id: $userId})-[my:RATED]->(m:Movie) \
+  //     MATCH (other:User)-[their:RATED]->(m) \
+  //     WHERE me <> other \
+  //     AND abs(my.rating - their.rating) < 2 \
+  //     WITH other,m \
+  //     MATCH (other)-[otherRating:RATED]->(movie:Movie) \
+  //     WHERE movie <> m \
+  //     WITH avg(otherRating.rating) AS avgRating, movie \
+  //     RETURN movie \
+  //     ORDER BY avgRating desc \
+  //     LIMIT 25',
+  //     {userId: userId}
+  //   )
+  // ).then(result => manyMovies(result));
+    // Step 1: Check if the user has rated any movies
+    return session.readTransaction(txc =>
+      txc.run(
+        'MATCH (me:User {id: $userId})-[r:RATED]->(m:Movie) \
+         RETURN COUNT(r) AS ratedCount',
+        { userId: userId }
+      )
     )
-  ).then(result => manyMovies(result));
-};
+    .then(result => {
+      const ratedCount = result.records[0].get('ratedCount').toInt();
+  
+      if (ratedCount > 0) {
+        // Step 2: User has rated movies, so we use the existing recommendation query
+        return session.readTransaction(txc =>
+          txc.run(
+            'MATCH (me:User {id: $userId})-[my:RATED]->(m:Movie) \
+             MATCH (other:User)-[their:RATED]->(m) \
+             WHERE me <> other AND abs(my.rating - their.rating) < 2 \
+             WITH other, m \
+             MATCH (other)-[otherRating:RATED]->(movie:Movie) \
+             WHERE movie <> m \
+             WITH avg(otherRating.rating) AS avgRating, movie \
+             RETURN movie \
+             ORDER BY avgRating DESC \
+             LIMIT 25',
+            { userId: userId }
+          )
+        );
+      } else {
+        // Step 2: User hasn't rated any movies, recommend top 5 movies from every genre
+        return session.readTransaction(txc =>
+          txc.run(
+            'MATCH (movie:Movie)-[:IN_GENRE]->(genre:Genre) \
+             WITH genre, movie \
+             ORDER BY movie.rating DESC \
+             WITH genre, collect(movie)[..5] AS topMovies \
+             UNWIND topMovies AS movie \
+             RETURN movie'
+          )
+        );
+      }
+    })
+    .then(result => manyMovies(result));
+  };
 
 // export exposed functions
 module.exports = {
   getAll: getAll,
   getById: getById,
+  // getByName: getByName,
   getByDateRange: getByDateRange,
   getByActor: getByActor,
   getByGenre: getByGenre,

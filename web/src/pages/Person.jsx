@@ -85,7 +85,9 @@ class Person extends React.Component {
                 <Link to={`/person/${a.id}`}>
                   <img src={a.posterImage} alt="" />
                 </Link>
-                <div className="nt-carousel-actor-name"><Link to={`/person/${a.id}`}>{a.name}</Link></div>
+                <div className="nt-carousel-actor-name">
+                  <Link to={`/person/${a.id}`}>{a.name}</Link>
+                  </div>
                 <div className="nt-carousel-actor-role">{a.role}</div>
               </div>
             );

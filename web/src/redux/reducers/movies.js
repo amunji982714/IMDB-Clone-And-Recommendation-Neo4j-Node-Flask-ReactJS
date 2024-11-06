@@ -3,9 +3,11 @@ import * as Types from '../actions/MovieActionTypes';
 const initialState = {
   isFetchingFeatured: false,
   isFetchingByGenre: false,
+  isFetchingByName: false,
   isFetching: false,
   featured: [],
   byGenre: {},
+  byName: {},
   detail: null
 };
 
@@ -24,6 +26,7 @@ export default function movies(state = initialState, action) {
         isFetching: getIsFetching(false),
         featured: action.response
       };
+// 
     case Types.MOVIES_BY_GENRES_GET_REQUEST:
       return  {
         ...state,
@@ -37,6 +40,21 @@ export default function movies(state = initialState, action) {
         isFetching: getIsFetching(false),
         byGenre: action.response
       };
+// 
+      case Types.MOVIES_BY_NAMES_GET_REQUEST:
+        return  {
+          ...state,
+          isFetchingByName: true,
+          isFetching: true
+        };
+      case Types.MOVIES_BY_NAMES_GET_SUCCESS:
+        return  {
+          ...state,
+          isFetchingByName: false,
+          isFetching: getIsFetching(false),
+          byName: action.response
+        };
+// 
     case Types.MOVIE_DETAIL_GET_REQUEST:
       return  {
         ...state,
@@ -59,5 +77,5 @@ export default function movies(state = initialState, action) {
 }
 
 function getIsFetching(state, isFetching) {
-  return (state.isFetchingByGenre || state.isFetchingFeatured || isFetching);
+  return (state.isFetchingByGenre || state.isFetchingFeatured || state.isFetchingByName || isFetching);
 }
